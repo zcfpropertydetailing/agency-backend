@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const clientRoutes = require('./routes/clients');
 const agentRoutes = require('./routes/agents');
 const metricsRoutes = require('./routes/metrics');
+const webflowRoutes = require('./routes/webflow');
 const { runWeeklyPerformanceReview } = require('./agents/performance');
 
 const app = express();
@@ -38,6 +39,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/metrics', metricsRoutes);
+app.use('/api/webflow', webflowRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
