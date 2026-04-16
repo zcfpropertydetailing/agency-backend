@@ -7,13 +7,13 @@ router.post('/register', async (req, res) => {
   const { email, password, businessName, industry, location, phone, subscriptionTier } = req.body;
 
   try {
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
-      password,
-      email_confirm: true
+      password
     });
 
     if (authError) throw authError;
+    if (!authData.user) throw new Error('Registration failed — please try again.');
 
     const { data: client, error: clientError } = await supabase
       .from('clients')
