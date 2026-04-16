@@ -17,9 +17,12 @@ const PORT = process.env.PORT || 3000;
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-service-key'],
+  credentials: false
 }));
+app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 
 // Rate limiting
