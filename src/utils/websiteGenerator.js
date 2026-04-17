@@ -12,6 +12,8 @@ async function generateWebsite(clientData) {
   const serviceList = Array.isArray(services) ? services.join(', ') : services || '';
   const areaList = Array.isArray(areas) ? areas.join(', ') : areas || location;
 
+  const conversationContext = clientData.conversationContext ? `\n\nCONVERSATION WITH CLIENT (extract all relevant details):\n${clientData.conversationContext}` : '';
+
   const prompt = `You are an elite web designer. Generate a COMPLETE, production-grade, single-file HTML website for the following business. The website must be world-class quality — comparable to sites charging $10,000+. It must look genuinely custom, not like a template.
 
 BUSINESS DETAILS:
