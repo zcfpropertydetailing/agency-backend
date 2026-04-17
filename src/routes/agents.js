@@ -103,7 +103,8 @@ router.post('/chat', requireAuth, async (req, res) => {
 
     // For website agent, check what's been collected (only until all 9 confirmed)
     let collected = null;
-    if (agentType === 'website') {
+    const userMessageCount = (history || []).filter(m => m.role === 'user').length + 1;
+    if (agentType === 'website' && userMessageCount >= 1) {
       // Check if all 9 were already confirmed in a previous message
       const { data: lastLog } = await supabase
         .from('agent_logs')
@@ -183,39 +184,44 @@ router.get('/access', requireAuth, async (req, res) => {
 async function checkCollected(messages) {
   const { callClaude } = require('../utils/anthropic');
   
-  const conversationText = messages
-    .map(m => m.role.toUpperCase() + ': ' + m.content)
+  // Only look at user messages for what they've provided
+  const userMessages = messages
+    .filter(m => m.role === 'user')
+    .map(m => 'CLIENT: ' + m.content)
     .join('\n\n')
-    .substring(0, 3000);
+    .substring(0, 2000);
 
-  const prompt = `Read this website onboarding conversation and determine which of 9 items the client has confirmed. Be generous — if the agent confirmed receiving something with "Updated ✓" or similar, mark it true.
+  // Also include agent confirmations (Updated ✓ lines only)
+  const agentConfirmations = messages
+    .filter(m => m.role === 'assistant')
+    .map(m => m.content)
+    .join(' ')
+    .split('\n')
+    .filter(line => line.includes('Updated') || line.includes('✓') || line.includes('got it') || line.includes('Got it'))
+    .join('\n')
+    .substring(0, 500);
 
-CONVERSATION:
-${conversationText}
+  const prompt = `Determine which of 9 items this client has explicitly provided. Only mark true if the CLIENT said it or the agent confirmed receiving it.
 
-Return ONLY this JSON, no explanation:
-{
-  "businessName": true/false,
-  "phone": true/false,
-  "industry": true/false,
-  "location": true/false,
-  "services": true/false,
-  "areas": true/false,
-  "yearsInBusiness": true/false,
-  "licensed": true/false,
-  "hours": true/false
-}
+CLIENT MESSAGES:
+${userMessages}
 
-Rules:
-- businessName: true if client stated their business name and agent acknowledged it
-- phone: true if a phone number was provided
-- industry: true if the type of business/service was stated
-- location: true if a city or location was stated
-- services: true if 3 or more services were listed
-- areas: true if service areas were mentioned (even "surrounding areas" counts)
-- yearsInBusiness: true if years in business was stated (any number of years)
-- licensed: true if licensed/insured status was confirmed (yes counts)
-- hours: true if business hours were stated in any form`;
+AGENT CONFIRMATIONS:
+${agentConfirmations}
+
+Return ONLY this JSON:
+{"businessName":false,"phone":false,"industry":false,"location":false,"services":false,"areas":false,"yearsInBusiness":false,"licensed":false,"hours":false}
+
+Rules — mark true ONLY if:
+- businessName: client stated their actual business name (not just "my business")
+- phone: client gave a phone number with digits
+- industry: client stated the type of service/business they do
+- location: client stated a city, state, or location
+- services: client listed 3 or more specific services
+- areas: client mentioned where they serve (cities, counties, or "surrounding areas")
+- yearsInBusiness: client stated how many years they have been in business
+- licensed: client said they are licensed and/or insured (or said yes when asked)
+- hours: client stated their operating hours in any form`;
 
   try {
     const raw = await callClaude('Return only valid JSON, nothing else.', prompt, 200);
