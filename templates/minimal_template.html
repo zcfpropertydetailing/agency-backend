@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{BUSINESS_NAME}} — {{INDUSTRY}} in {{LOCATION}}</title>
+<meta name="description" content="{{META_DESCRIPTION}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f5f5f4;
+  --ink:#0a0a0a;
+  --ink-soft:#525252;
+  --ink-mute:#a3a3a3;
+  --line:#e7e5e4;
+  --accent:{{ACCENT_COLOR}};
+  --font:'Inter',sans-serif;
+  --max:1440px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.5;font-weight:400;font-size:16px}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+.container{max-width:var(--max);margin:0 auto;padding:0 32px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+.nav-logo{font-size:18px;font-weight:700;letter-spacing:-0.02em;color:var(--ink)}
+.nav-logo::after{content:'';display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;margin-left:6px;vertical-align:middle}
+.nav-links{display:flex;align-items:center;gap:40px}
+.nav-links a{color:var(--ink-soft);font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{background:var(--ink);color:var(--bg)!important;padding:10px 20px;border-radius:100px;font-weight:600!important;transition:.2s!important}
+.nav-cta:hover{background:var(--accent);color:var(--ink)!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.hamburger span{width:22px;height:2px;background:var(--ink);border-radius:2px}
+.mobile-menu{display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:32px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:28px;font-weight:700;letter-spacing:-0.02em}
+
+/* HERO */
+.hero{padding:160px 0 120px;background:var(--bg);position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg-alt);border:1px solid var(--line);border-radius:100px;padding:6px 14px;font-size:13px;color:var(--ink-soft);margin-bottom:40px;font-weight:500}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+.hero h1{font-size:clamp(56px,9vw,120px);font-weight:800;line-height:.95;letter-spacing:-0.04em;color:var(--ink);margin-bottom:40px;max-width:1100px}
+.hero h1 span{color:var(--ink-mute)}
+.hero-lede{font-size:20px;color:var(--ink-soft);line-height:1.5;max-width:620px;margin-bottom:56px;font-weight:400}
+.hero-btns{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);padding:16px 32px;border-radius:100px;font-size:15px;font-weight:600;transition:.2s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--accent);color:var(--ink)}
+.btn-primary svg{width:16px;height:16px;transition:transform .2s}
+.btn-primary:hover svg{transform:translateX(4px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;color:var(--ink);padding:16px 24px;font-size:15px;font-weight:600;transition:.2s}
+.btn-ghost:hover{color:var(--accent)}
+
+/* STATS STRIP */
+.stats{padding:80px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px}
+.stat{}
+.stat-num{font-size:64px;font-weight:800;letter-spacing:-0.04em;color:var(--ink);line-height:1;margin-bottom:8px}
+.stat-num span{color:var(--accent)}
+.stat-label{font-size:14px;color:var(--ink-soft);font-weight:500}
+
+/* SERVICES */
+.services{padding:160px 0}
+.section-label{display:inline-block;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:20px;letter-spacing:0}
+.section-title{font-size:clamp(40px,5vw,72px);font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--ink);margin-bottom:24px;max-width:900px}
+.section-title span{color:var(--ink-mute)}
+.section-sub{font-size:18px;color:var(--ink-soft);max-width:620px;line-height:1.5;margin-bottom:80px}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.service{padding:40px;background:var(--bg-alt);border-radius:24px;transition:.3s;cursor:default}
+.service:hover{background:var(--ink);color:var(--bg)}
+.service:hover .service-icon{background:var(--accent);color:var(--ink)}
+.service:hover .service-desc{color:rgba(255,255,255,.7)}
+.service-icon{width:56px;height:56px;background:var(--bg);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:32px;transition:.3s}
+.service-num{font-size:13px;color:var(--ink-mute);font-weight:600;margin-bottom:16px}
+.service h3{font-size:26px;font-weight:700;letter-spacing:-0.02em;margin-bottom:12px;line-height:1.2}
+.service-desc{font-size:15px;color:var(--ink-soft);line-height:1.6;transition:.3s}
+
+/* FEATURE STRIP */
+.feature{padding:160px 0;background:var(--ink);color:var(--bg)}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.feature-visual{aspect-ratio:1;background:linear-gradient(135deg,rgba(var(--accent-rgb),.1) 0%,rgba(255,255,255,.03) 100%);border-radius:32px;display:flex;align-items:center;justify-content:center;font-size:160px;font-weight:800;color:var(--accent);border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden}
+.feature-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.05),transparent)}
+.feature-label{color:var(--accent)}
+.feature h2{font-size:clamp(40px,5vw,72px);font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--bg);margin-bottom:32px}
+.feature h2 span{color:rgba(255,255,255,.4)}
+.feature-text{font-size:18px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:40px;max-width:500px}
+.feature-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+.feature-list li{display:flex;align-items:center;gap:14px;font-size:16px;color:rgba(255,255,255,.85)}
+.feature-check{width:28px;height:28px;background:var(--accent);color:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+
+/* TESTIMONIALS */
+.testimonials{padding:160px 0;background:var(--bg)}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
+.test-card{padding:40px;background:var(--bg-alt);border-radius:24px;border:1px solid var(--line)}
+.test-stars{color:var(--accent);font-size:18px;margin-bottom:20px;letter-spacing:2px}
+.test-text{font-size:17px;line-height:1.6;color:var(--ink);margin-bottom:32px;font-weight:400}
+.test-author{display:flex;align-items:center;gap:14px}
+.test-avatar{width:44px;height:44px;background:var(--ink);color:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.test-info{}
+.test-name{font-size:15px;font-weight:600;color:var(--ink)}
+.test-detail{font-size:13px;color:var(--ink-soft)}
+
+/* AREAS */
+.areas{padding:160px 0;background:var(--bg-alt);border-top:1px solid var(--line)}
+.areas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:64px}
+.area{padding:24px;background:var(--bg);border-radius:16px;font-size:16px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:12px;transition:.2s;border:1px solid var(--line)}
+.area:hover{border-color:var(--accent);background:var(--bg)}
+.area-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* CONTACT */
+.contact{padding:160px 0;background:var(--bg)}
+.contact-inner{background:var(--bg-alt);border-radius:32px;padding:80px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.contact-left .section-label{color:var(--accent)}
+.contact-left h2{font-size:clamp(36px,4.5vw,56px);font-weight:800;letter-spacing:-0.03em;line-height:1;margin-bottom:24px}
+.contact-lede{font-size:17px;color:var(--ink-soft);line-height:1.6;margin-bottom:40px;max-width:440px}
+.contact-methods{display:flex;flex-direction:column;gap:20px}
+.contact-method{display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border-radius:16px;border:1px solid var(--line)}
+.contact-method-icon{width:44px;height:44px;background:var(--ink);color:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.contact-method-label{font-size:12px;color:var(--ink-soft);font-weight:500;margin-bottom:2px}
+.contact-method-value{font-size:17px;font-weight:700;color:var(--ink)}
+.contact-form{background:var(--bg);padding:40px;border-radius:24px}
+.contact-form h3{font-size:24px;font-weight:700;letter-spacing:-0.02em;margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 18px;border:1px solid var(--line);border-radius:12px;font-family:var(--font);font-size:15px;color:var(--ink);background:var(--bg);transition:.2s;outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-submit{width:100%;padding:16px;background:var(--ink);color:var(--bg);border:none;border-radius:12px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:.2s;margin-top:8px}
+.form-submit:hover{background:var(--accent);color:var(--ink)}
+
+/* FOOTER */
+footer{padding:80px 0 32px;background:var(--bg);border-top:1px solid var(--line)}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:64px}
+.footer-logo{font-size:20px;font-weight:700;letter-spacing:-0.02em;margin-bottom:12px}
+.footer-logo::after{content:'';display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;margin-left:6px;vertical-align:middle}
+.footer-desc{font-size:14px;color:var(--ink-soft);line-height:1.6;max-width:280px}
+.footer-col h4{font-size:13px;font-weight:600;color:var(--ink-mute);margin-bottom:20px;letter-spacing:0}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:8px}
+.footer-col ul li a{font-size:14px;color:var(--ink);font-weight:500;transition:color .2s}
+.footer-col ul li a:hover{color:var(--accent)}
+.footer-bottom{padding-top:32px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-soft)}
+
+/* FLOATING */
+.float-cta{position:fixed;bottom:24px;right:24px;z-index:500}
+.float-btn{display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);padding:14px 24px;border-radius:100px;font-size:14px;font-weight:600;box-shadow:0 12px 40px rgba(0,0,0,.15);transition:.2s;border:none;cursor:pointer}
+.float-btn:hover{background:var(--accent);color:var(--ink);transform:translateY(-2px)}
+
+/* ANIM */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.hero h1{font-size:clamp(48px,8vw,80px)}.stats-grid{grid-template-columns:repeat(2,1fr);gap:48px}.services-grid{grid-template-columns:repeat(2,1fr)}.feature-grid{grid-template-columns:1fr;gap:60px}.feature-visual{max-width:500px;margin:0 auto}.test-grid{grid-template-columns:1fr 1fr}.contact-inner{grid-template-columns:1fr;gap:48px;padding:48px}.footer-top{grid-template-columns:1fr 1fr;gap:32px}}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:flex}.container{padding:0 20px}.services-grid{grid-template-columns:1fr}.test-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.contact-inner{padding:32px}.footer-top{grid-template-columns:1fr;gap:32px}.footer-bottom{flex-direction:column;gap:12px;text-align:center}.hero-btns{width:100%}.btn-primary,.btn-ghost{flex:1;justify-content:center}.stats{padding:60px 0}.stat-num{font-size:48px}.float-cta{bottom:16px;right:16px}}
+</style>
+</head>
+<body>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMobile()">Services</a>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="#testimonials" onclick="closeMobile()">Reviews</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+  <a href="tel:{{PHONE_RAW}}" onclick="closeMobile()">{{PHONE}}</a>
+</div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="nav-logo">{{LOGO_NAME}}</div>
+    <div class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#about">About</a>
+      <a href="#testimonials">Reviews</a>
+      <a href="#contact">Contact</a>
+      <a href="#contact" class="nav-cta">Get Started</a>
+    </div>
+    <div class="hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Now serving {{LOCATION}} and surrounding areas</div>
+    <h1>{{HERO_HEADLINE}} <span>{{HERO_SUBHEADLINE}}</span></h1>
+    <p class="hero-lede">{{HERO_DESCRIPTION}}</p>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-primary">Get a free quote <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+      <a href="tel:{{PHONE_RAW}}" class="btn-ghost">Or call {{PHONE}} →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-num">{{STAT1_NUM}}<span>.</span></div><div class="stat-label">{{STAT1_LABEL}}</div></div>
+      <div class="stat"><div class="stat-num">{{STAT2_NUM}}<span>.</span></div><div class="stat-label">{{STAT2_LABEL}}</div></div>
+      <div class="stat"><div class="stat-num">{{STAT3_NUM}}<span>.</span></div><div class="stat-label">{{STAT3_LABEL}}</div></div>
+      <div class="stat"><div class="stat-num">{{STAT4_NUM}}<span>.</span></div><div class="stat-label">{{STAT4_LABEL}}</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services fade-in" id="services">
+  <div class="container">
+    <div class="section-label">/ Services</div>
+    <h2 class="section-title">{{SERVICES_HEADLINE_PART1}} <span>{{SERVICES_HEADLINE_PART2}}</span></h2>
+    <p class="section-sub">{{SERVICES_SUBTEXT}}</p>
+    <div class="services-grid">
+      {{SERVICES_CARDS}}
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE -->
+<section class="feature fade-in" id="about">
+  <div class="container">
+    <div class="feature-grid">
+      <div>
+        <div class="section-label feature-label">/ About Us</div>
+        <h2>{{ABOUT_HEADLINE_PART1}} <span>{{ABOUT_HEADLINE_PART2}}</span></h2>
+        <p class="feature-text">{{ABOUT_P1}}</p>
+        <ul class="feature-list">
+          <li><span class="feature-check">✓</span> Licensed & fully insured</li>
+          <li><span class="feature-check">✓</span> {{FEATURE2}}</li>
+          <li><span class="feature-check">✓</span> {{FEATURE3}}</li>
+          <li><span class="feature-check">✓</span> {{FEATURE4}}</li>
+        </ul>
+      </div>
+      <div class="feature-visual">{{LOGO_INITIAL}}</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials fade-in" id="testimonials">
+  <div class="container">
+    <div class="section-label">/ Reviews</div>
+    <h2 class="section-title">Trusted by homeowners <span>across {{LOCATION}}.</span></h2>
+    <div class="test-grid">
+      {{TESTIMONIALS}}
+    </div>
+  </div>
+</section>
+
+<!-- AREAS -->
+<section class="areas fade-in">
+  <div class="container">
+    <div class="section-label">/ Coverage</div>
+    <h2 class="section-title">Where we work.</h2>
+    <div class="areas-grid">{{AREA_CARDS}}</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact fade-in" id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="contact-left">
+        <div class="section-label">/ Contact</div>
+        <h2>Let's get to work.</h2>
+        <p class="contact-lede">{{CONTACT_INTRO}}</p>
+        <div class="contact-methods">
+          <div class="contact-method">
+            <div class="contact-method-icon">📞</div>
+            <div><div class="contact-method-label">Call or text</div><div class="contact-method-value"><a href="tel:{{PHONE_RAW}}">{{PHONE}}</a></div></div>
+          </div>
+          <div class="contact-method">
+            <div class="contact-method-icon">🕐</div>
+            <div><div class="contact-method-label">Hours</div><div class="contact-method-value">{{HOURS}}</div></div>
+          </div>
+          <div class="contact-method">
+            <div class="contact-method-icon">📍</div>
+            <div><div class="contact-method-label">Based in</div><div class="contact-method-value">{{LOCATION}}</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3>Get a free quote</h3>
+        <form action="https://formspree.io/f/placeholder" method="POST">
+          <div class="form-row">
+            <div class="form-group"><input name="first_name" placeholder="First name" required></div>
+            <div class="form-group"><input name="last_name" placeholder="Last name" required></div>
+          </div>
+          <div class="form-group"><input type="tel" name="phone" placeholder="Phone" required></div>
+          <div class="form-group"><input type="email" name="email" placeholder="Email"></div>
+          <div class="form-group"><select name="service">{{SERVICE_OPTIONS}}</select></div>
+          <div class="form-group"><textarea name="message" placeholder="Tell us about your project" rows="3"></textarea></div>
+          <button type="submit" class="form-submit">Send request →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">{{LOGO_NAME}}</div>
+        <p class="footer-desc">{{FOOTER_DESC}}</p>
+      </div>
+      <div class="footer-col"><h4>Services</h4><ul>{{FOOTER_SERVICES}}</ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="#about">About</a></li><li><a href="#testimonials">Reviews</a></li><li><a href="#contact">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="tel:{{PHONE_RAW}}">{{PHONE}}</a></li><li>{{LOCATION}}</li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <div>© {{YEAR}} {{BUSINESS_NAME}}. All rights reserved.</div>
+      <div>Licensed & insured · {{LOCATION}}</div>
+    </div>
+  </div>
+</footer>
+
+<div class="float-cta"><a href="tel:{{PHONE_RAW}}" class="float-btn">📞 {{PHONE}}</a></div>
+
+<script>
+function toggleMobile(){document.getElementById('mobileMenu').classList.toggle('open')}
+function closeMobile(){document.getElementById('mobileMenu').classList.remove('open')}
+const obs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+document.querySelector('form').addEventListener('submit',function(){const b=this.querySelector('.form-submit');b.textContent='Sending...';b.disabled=true});
+</script>
+</body>
+</html>

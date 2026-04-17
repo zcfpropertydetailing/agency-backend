@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{BUSINESS_NAME}} | {{INDUSTRY}} | {{LOCATION}}</title>
+<meta name="description" content="{{META_DESCRIPTION}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --charcoal:#1c1917;
+  --cream:#faf7f2;
+  --cream-dark:#f0ebe2;
+  --gold:{{ACCENT_COLOR}};
+  --gold-dark:#b08a3e;
+  --text:#2a2724;
+  --text-soft:#6b645d;
+  --line:rgba(28,25,23,.08);
+  --font-display:'Cormorant Garamond',serif;
+  --font-body:'Inter',sans-serif;
+  --max:1280px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--text);background:var(--cream);line-height:1.7;font-weight:300}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+.container{max-width:var(--max);margin:0 auto;padding:0 40px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(250,247,242,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);transition:.4s}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:88px}
+.nav-logo{font-family:var(--font-display);font-size:28px;font-weight:500;letter-spacing:1px;color:var(--charcoal)}
+.nav-logo em{color:var(--gold);font-style:normal}
+.nav-links{display:flex;align-items:center;gap:48px}
+.nav-links a{color:var(--text);font-size:13px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;transition:.3s;position:relative}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--gold);transition:.3s}
+.nav-links a:hover::after{width:100%}
+.nav-cta{border:1px solid var(--charcoal);padding:12px 28px;letter-spacing:1.5px!important}
+.nav-cta:hover{background:var(--charcoal);color:var(--cream)!important}
+.hamburger{display:none;flex-direction:column;gap:6px;cursor:pointer;padding:8px}
+.hamburger span{width:26px;height:1px;background:var(--charcoal)}
+.mobile-menu{display:none;position:fixed;inset:0;background:var(--cream);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:40px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-family:var(--font-display);font-size:36px;font-weight:400;color:var(--charcoal)}
+
+/* HERO */
+.hero{min-height:100vh;padding:120px 0 80px;display:flex;align-items:center;background:var(--cream);position:relative;overflow:hidden}
+.hero-ornament{position:absolute;top:50%;right:-200px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(176,138,62,.08) 0%,transparent 65%);transform:translateY(-50%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:80px;align-items:center;position:relative;z-index:2}
+.hero-eyebrow{font-size:12px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:32px;display:flex;align-items:center;gap:16px}
+.hero-eyebrow::before{content:'';width:40px;height:1px;background:var(--gold)}
+.hero h1{font-family:var(--font-display);font-size:clamp(56px,7vw,96px);font-weight:400;line-height:1.05;letter-spacing:-1px;color:var(--charcoal);margin-bottom:32px}
+.hero h1 em{font-style:italic;color:var(--gold);font-weight:400}
+.hero-lede{font-size:18px;color:var(--text-soft);line-height:1.8;max-width:500px;margin-bottom:48px;font-weight:300}
+.hero-btns{display:flex;gap:20px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:12px;background:var(--charcoal);color:var(--cream);padding:20px 40px;font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;transition:.3s;border:1px solid var(--charcoal)}
+.btn-primary:hover{background:transparent;color:var(--charcoal)}
+.btn-outline{display:inline-flex;align-items:center;gap:12px;background:transparent;color:var(--charcoal);padding:20px 40px;font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;transition:.3s;border:1px solid var(--charcoal)}
+.btn-outline:hover{background:var(--charcoal);color:var(--cream)}
+.hero-visual{position:relative;aspect-ratio:3/4;background:linear-gradient(135deg,var(--cream-dark) 0%,#e8dfd0 100%);overflow:hidden}
+.hero-visual-inner{position:absolute;inset:24px;background:var(--charcoal);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:120px;font-family:var(--font-display);font-style:italic}
+.hero-signature{position:absolute;bottom:-30px;right:-30px;background:var(--gold);color:var(--charcoal);padding:32px 40px;font-family:var(--font-display)}
+.hero-signature-num{font-size:48px;font-weight:400;line-height:1}
+.hero-signature-text{font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+
+/* ACCOLADES */
+.accolades{padding:48px 0;background:var(--charcoal);color:var(--cream)}
+.accolades-inner{display:flex;align-items:center;justify-content:space-between;gap:48px;flex-wrap:wrap}
+.accolade{display:flex;align-items:center;gap:16px}
+.accolade-mark{font-family:var(--font-display);font-size:32px;font-style:italic;color:var(--gold);font-weight:400}
+.accolade-text{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(250,247,242,.75);line-height:1.5}
+
+/* SERVICES */
+.services{padding:140px 0;background:var(--cream)}
+.section-eyebrow{font-size:12px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.section-eyebrow::before{content:'';width:40px;height:1px;background:var(--gold)}
+.section-head{font-family:var(--font-display);font-size:clamp(42px,5vw,72px);font-weight:400;line-height:1.1;letter-spacing:-1px;color:var(--charcoal);margin-bottom:24px;max-width:700px}
+.section-head em{font-style:italic;color:var(--gold)}
+.section-lede{font-size:17px;color:var(--text-soft);max-width:560px;line-height:1.8;margin-bottom:80px}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+.service-item{padding:56px 40px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);transition:.4s;position:relative}
+.service-item:nth-child(3n){border-right:none}
+.service-item:hover{background:var(--charcoal);color:var(--cream)}
+.service-item:hover .service-num,.service-item:hover h3{color:var(--gold)}
+.service-num{font-family:var(--font-display);font-style:italic;font-size:14px;color:var(--gold);margin-bottom:24px;letter-spacing:1px}
+.service-item h3{font-family:var(--font-display);font-size:32px;font-weight:400;line-height:1.2;color:var(--charcoal);margin-bottom:16px;transition:.4s}
+.service-item p{font-size:15px;color:var(--text-soft);line-height:1.8;font-weight:300}
+.service-item:hover p{color:rgba(250,247,242,.8)}
+
+/* PHILOSOPHY */
+.philosophy{padding:140px 0;background:var(--charcoal);color:var(--cream)}
+.philosophy-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:100px;align-items:center}
+.philosophy-visual{aspect-ratio:4/5;background:linear-gradient(135deg,#2a2724 0%,#1c1917 100%);position:relative;overflow:hidden;border:1px solid rgba(250,247,242,.08)}
+.philosophy-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(176,138,62,.2) 0%,transparent 60%)}
+.philosophy-visual-mark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:180px;font-style:italic;color:var(--gold);opacity:.25}
+.philosophy-stamp{position:absolute;bottom:24px;left:24px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(250,247,242,.6)}
+.philosophy h2{font-family:var(--font-display);font-size:clamp(40px,4.5vw,64px);font-weight:400;line-height:1.15;color:var(--cream);margin-bottom:32px}
+.philosophy h2 em{font-style:italic;color:var(--gold)}
+.philosophy-text{font-size:17px;color:rgba(250,247,242,.75);line-height:1.9;margin-bottom:24px;font-weight:300}
+.philosophy-quote{font-family:var(--font-display);font-size:22px;font-style:italic;color:var(--gold);line-height:1.5;margin-top:40px;padding-left:24px;border-left:1px solid var(--gold)}
+.philosophy-sig{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(250,247,242,.6);margin-top:24px}
+
+/* TESTIMONIALS */
+.testimonials{padding:140px 0;background:var(--cream-dark)}
+.testimonials-wrap{max-width:900px;margin:80px auto 0;text-align:center}
+.testimonial-lg{font-family:var(--font-display);font-size:clamp(28px,3vw,44px);font-style:italic;font-weight:400;line-height:1.4;color:var(--charcoal);margin-bottom:48px;position:relative;padding:0 40px}
+.testimonial-lg::before,.testimonial-lg::after{font-family:var(--font-display);font-size:80px;color:var(--gold);font-style:normal;position:absolute;line-height:1}
+.testimonial-lg::before{content:'"';top:-20px;left:0}
+.testimonial-lg::after{content:'"';bottom:-60px;right:0}
+.testimonial-author{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--charcoal);margin-top:48px}
+.testimonial-author em{display:block;font-style:normal;color:var(--gold);font-size:12px;margin-top:4px}
+.testimonials-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:48px;margin-top:100px;padding-top:80px;border-top:1px solid var(--line)}
+.mini-test{font-family:var(--font-display);font-size:20px;font-style:italic;line-height:1.6;color:var(--charcoal)}
+.mini-test-author{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-top:20px;font-family:var(--font-body);font-style:normal}
+
+/* AREAS */
+.areas{padding:100px 0;background:var(--cream)}
+.areas-wrap{text-align:center;max-width:900px;margin:0 auto}
+.areas-list{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 40px;margin-top:48px;font-family:var(--font-display);font-size:24px;color:var(--charcoal)}
+.areas-list span{position:relative}
+.areas-list span:not(:last-child)::after{content:'·';position:absolute;right:-24px;color:var(--gold);font-weight:700}
+
+/* CONTACT */
+.contact{padding:140px 0;background:var(--charcoal);color:var(--cream)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px}
+.contact h2{font-family:var(--font-display);font-size:clamp(40px,5vw,72px);font-weight:400;line-height:1.1;margin-bottom:32px;color:var(--cream)}
+.contact h2 em{color:var(--gold);font-style:italic}
+.contact-lede{font-size:17px;color:rgba(250,247,242,.7);line-height:1.8;margin-bottom:56px;max-width:500px;font-weight:300}
+.contact-details{border-top:1px solid rgba(250,247,242,.1)}
+.contact-detail{padding:24px 0;border-bottom:1px solid rgba(250,247,242,.1);display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:24px}
+.contact-detail-label{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+.contact-detail-value{font-family:var(--font-display);font-size:22px;font-weight:400;color:var(--cream)}
+.contact-detail-value a:hover{color:var(--gold)}
+.contact-form{background:rgba(250,247,242,.03);padding:56px;border:1px solid rgba(250,247,242,.08)}
+.contact-form h3{font-family:var(--font-display);font-size:36px;font-weight:400;color:var(--cream);margin-bottom:8px}
+.contact-form-sub{color:rgba(250,247,242,.55);font-size:14px;margin-bottom:32px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(250,247,242,.5);margin-bottom:8px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 0;background:transparent;border:none;border-bottom:1px solid rgba(250,247,242,.15);color:var(--cream);font-family:var(--font-body);font-size:15px;outline:none;transition:.3s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-bottom-color:var(--gold)}
+.form-group input::placeholder,.form-group textarea::placeholder{color:rgba(250,247,242,.3)}
+.form-group select{background:transparent;color:var(--cream)}
+.form-group select option{background:var(--charcoal)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-submit{width:100%;margin-top:24px;padding:20px;background:var(--gold);color:var(--charcoal);border:none;font-family:var(--font-body);font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:.3s}
+.form-submit:hover{background:var(--cream)}
+
+/* FOOTER */
+footer{padding:80px 0 40px;background:var(--charcoal);border-top:1px solid rgba(250,247,242,.08)}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px}
+.footer-logo{font-family:var(--font-display);font-size:36px;color:var(--cream);margin-bottom:16px}
+.footer-logo em{color:var(--gold);font-style:normal}
+.footer-desc{color:rgba(250,247,242,.5);font-size:14px;line-height:1.8;max-width:320px;font-weight:300}
+.footer-col h4{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;font-weight:500}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:12px}
+.footer-col ul li a{font-family:var(--font-display);font-size:17px;color:rgba(250,247,242,.65);transition:.3s}
+.footer-col ul li a:hover{color:var(--gold)}
+.footer-bottom{padding-top:40px;border-top:1px solid rgba(250,247,242,.08);display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:1px;color:rgba(250,247,242,.4)}
+
+/* FLOATING */
+.float-cta{position:fixed;bottom:32px;right:32px;z-index:500}
+.float-btn{display:flex;align-items:center;gap:12px;background:var(--charcoal);color:var(--cream);padding:18px 28px;font-size:13px;font-weight:500;letter-spacing:2px;text-transform:uppercase;box-shadow:0 12px 48px rgba(0,0,0,.25);transition:.3s;border:1px solid var(--gold)}
+.float-btn:hover{background:var(--gold);color:var(--charcoal)}
+
+/* ANIM */
+.fade-in{opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.hero-grid{grid-template-columns:1fr;gap:60px}.services-grid{grid-template-columns:repeat(2,1fr)}.service-item:nth-child(3n){border-right:1px solid var(--line)}.service-item:nth-child(2n){border-right:none}.philosophy-grid{grid-template-columns:1fr;gap:60px}.contact-grid{grid-template-columns:1fr;gap:60px}.footer-top{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:flex}.container{padding:0 24px}.services-grid{grid-template-columns:1fr}.service-item{border-right:none!important}.form-row{grid-template-columns:1fr}.footer-top{grid-template-columns:1fr;gap:40px}.footer-bottom{flex-direction:column;gap:16px;text-align:center}.testimonials-mini{grid-template-columns:1fr}.contact-detail{grid-template-columns:1fr;gap:4px}.accolades-inner{justify-content:center}.float-cta{bottom:20px;right:20px}.float-btn{padding:14px 20px;font-size:12px}}
+</style>
+</head>
+<body>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMobile()">Services</a>
+  <a href="#about" onclick="closeMobile()">Philosophy</a>
+  <a href="#testimonials" onclick="closeMobile()">Testimonials</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+  <a href="tel:{{PHONE_RAW}}" onclick="closeMobile()">{{PHONE}}</a>
+</div>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="nav-logo">{{LOGO_NAME}}<em>.</em></div>
+    <div class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#about">Philosophy</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#contact">Contact</a>
+      <a href="tel:{{PHONE_RAW}}" class="nav-cta">{{PHONE}}</a>
+    </div>
+    <div class="hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-ornament"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">{{LOCATION}} · {{INDUSTRY}}</div>
+        <h1>{{HERO_HEADLINE}} <em>{{HERO_SUBHEADLINE}}</em></h1>
+        <p class="hero-lede">{{HERO_DESCRIPTION}}</p>
+        <div class="hero-btns">
+          <a href="#contact" class="btn-primary">Request Consultation</a>
+          <a href="tel:{{PHONE_RAW}}" class="btn-outline">{{PHONE}}</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-visual-inner">{{LOGO_INITIAL}}</div>
+        <div class="hero-signature">
+          <div class="hero-signature-num">{{YEARS}}</div>
+          <div class="hero-signature-text">Years of Excellence</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACCOLADES -->
+<div class="accolades">
+  <div class="container accolades-inner">
+    <div class="accolade"><span class="accolade-mark">✦</span><span class="accolade-text">Licensed<br>& Insured</span></div>
+    <div class="accolade"><span class="accolade-mark">✦</span><span class="accolade-text">Locally<br>Owned</span></div>
+    <div class="accolade"><span class="accolade-mark">✦</span><span class="accolade-text">Five-Star<br>Reputation</span></div>
+    <div class="accolade"><span class="accolade-mark">✦</span><span class="accolade-text">Master<br>Craftsmen</span></div>
+    <div class="accolade"><span class="accolade-mark">✦</span><span class="accolade-text">Satisfaction<br>Guaranteed</span></div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="services fade-in" id="services">
+  <div class="container">
+    <div class="section-eyebrow">What We Offer</div>
+    <h2 class="section-head">A comprehensive suite of <em>tailored services</em>.</h2>
+    <p class="section-lede">{{SERVICES_SUBTEXT}}</p>
+    <div class="services-grid">
+      {{SERVICES_CARDS}}
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy fade-in" id="about">
+  <div class="container">
+    <div class="philosophy-grid">
+      <div class="philosophy-visual">
+        <div class="philosophy-visual-mark">{{LOGO_INITIAL}}</div>
+        <div class="philosophy-stamp">Est. {{ESTABLISHED}}</div>
+      </div>
+      <div>
+        <div class="section-eyebrow" style="color:var(--gold)">Our Philosophy</div>
+        <h2>{{ABOUT_HEADLINE_PART1}} <em>{{ABOUT_HEADLINE_PART2}}</em></h2>
+        <p class="philosophy-text">{{ABOUT_P1}}</p>
+        <p class="philosophy-text">{{ABOUT_P2}}</p>
+        <div class="philosophy-quote">{{PHILOSOPHY_QUOTE}}</div>
+        <div class="philosophy-sig">— {{FOUNDER_NAME}}, Founder</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials fade-in" id="testimonials">
+  <div class="container">
+    <div style="text-align:center">
+      <div class="section-eyebrow" style="justify-content:center">Client Voices</div>
+      <h2 class="section-head" style="margin:0 auto">What our clients <em>say about us</em>.</h2>
+    </div>
+    <div class="testimonials-wrap">
+      <div class="testimonial-lg">{{HERO_TESTIMONIAL_TEXT}}</div>
+      <div class="testimonial-author">{{HERO_TESTIMONIAL_AUTHOR}}<em>{{HERO_TESTIMONIAL_DETAIL}}</em></div>
+    </div>
+    <div class="testimonials-mini">
+      {{MINI_TESTIMONIALS}}
+    </div>
+  </div>
+</section>
+
+<!-- AREAS -->
+<section class="areas fade-in">
+  <div class="container">
+    <div class="areas-wrap">
+      <div class="section-eyebrow" style="justify-content:center">Where We Serve</div>
+      <h2 class="section-head" style="margin:0 auto">Proudly serving <em>{{LOCATION}}</em> and beyond.</h2>
+      <div class="areas-list">{{AREA_ITEMS}}</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact fade-in" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div>
+        <div class="section-eyebrow">Begin the Conversation</div>
+        <h2>Let us create <em>something exceptional</em> together.</h2>
+        <p class="contact-lede">{{CONTACT_INTRO}}</p>
+        <div class="contact-details">
+          <div class="contact-detail">
+            <div class="contact-detail-label">Telephone</div>
+            <div class="contact-detail-value"><a href="tel:{{PHONE_RAW}}">{{PHONE}}</a></div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-label">Location</div>
+            <div class="contact-detail-value">{{LOCATION}}</div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-label">Hours</div>
+            <div class="contact-detail-value">{{HOURS}}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="contact-form">
+          <h3>Request a Consultation</h3>
+          <p class="contact-form-sub">We typically respond within one business day.</p>
+          <form action="https://formspree.io/f/placeholder" method="POST">
+            <div class="form-row">
+              <div class="form-group"><label>First Name</label><input name="first_name" required></div>
+              <div class="form-group"><label>Last Name</label><input name="last_name" required></div>
+            </div>
+            <div class="form-group"><label>Telephone</label><input type="tel" name="phone" required></div>
+            <div class="form-group"><label>Email Address</label><input type="email" name="email"></div>
+            <div class="form-group"><label>Service of Interest</label><select name="service">{{SERVICE_OPTIONS}}</select></div>
+            <div class="form-group"><label>Tell us about your project</label><textarea name="message"></textarea></div>
+            <button type="submit" class="form-submit">Submit Inquiry</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">{{LOGO_NAME}}<em>.</em></div>
+        <p class="footer-desc">{{FOOTER_DESC}}</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>{{FOOTER_SERVICES}}</ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#about">Philosophy</a></li>
+          <li><a href="#testimonials">Testimonials</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="tel:{{PHONE_RAW}}">{{PHONE}}</a></li>
+          <li>{{LOCATION}}</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© {{YEAR}} {{BUSINESS_NAME}}. All Rights Reserved.</div>
+      <div>{{LOCATION}} · Licensed & Insured</div>
+    </div>
+  </div>
+</footer>
+
+<div class="float-cta"><a href="tel:{{PHONE_RAW}}" class="float-btn">Call {{PHONE}}</a></div>
+
+<script>
+function toggleMobile(){document.getElementById('mobileMenu').classList.toggle('open')}
+function closeMobile(){document.getElementById('mobileMenu').classList.remove('open')}
+const obs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+window.addEventListener('scroll',()=>{const n=document.querySelector('nav');n.style.background=window.scrollY>50?'rgba(250,247,242,0.98)':'rgba(250,247,242,0.92)'});
+document.querySelector('form').addEventListener('submit',function(){const b=this.querySelector('.form-submit');b.textContent='Sending...';b.disabled=true});
+</script>
+</body>
+</html>
