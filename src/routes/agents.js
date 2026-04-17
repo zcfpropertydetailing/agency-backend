@@ -101,7 +101,17 @@ router.post('/chat', requireAuth, async (req, res) => {
       }
     }
 
-    res.json({ reply, agentType });
+    // For website agent, check what's been collected
+    let collected = null;
+    if (agentType === 'website') {
+      const fullHistory = [...(history || []),
+        { role: 'user', content: message },
+        { role: 'assistant', content: reply }
+      ];
+      collected = await checkCollected(fullHistory);
+    }
+
+    res.json({ reply, collected });
   } catch (err) {
     console.error('Agent chat error:', err);
     res.status(500).json({ error: 'Agent encountered an error. Please try again.' });
@@ -143,43 +153,57 @@ router.get('/access', requireAuth, async (req, res) => {
   }
 });
 
-// Fast reliable collected check based on full conversation
-function checkCollected(messages) {
-  const userText = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
-  const userLower = userText.toLowerCase();
-  const assistantText = messages.filter(m => m.role === 'assistant').map(m => m.content).join(' ').toLowerCase();
+// Claude-powered collected check — reliable context-aware detection
+async function checkCollected(messages) {
+  const { callClaude } = require('../utils/anthropic');
+  
+  const conversationText = messages
+    .map(m => m.role.toUpperCase() + ': ' + m.content)
+    .join('
 
-  // Phone: look for number patterns
-  const hasPhone = /\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/.test(userText);
+')
+    .substring(0, 3000);
 
-  // Business name: agent confirmed it (Updated ✓ in assistant text) or user gave substantial first message
-  const hasBusinessName = assistantText.includes('updated') && (assistantText.includes('business name') || assistantText.includes('set up as')) || messages.filter(m => m.role === 'user').length >= 1;
+  const prompt = `Read this website onboarding conversation and determine which of 9 items the client has confirmed. Be generous — if the agent confirmed receiving something with "Updated ✓" or similar, mark it true.
 
-  // Industry: service type mentioned
-  const hasIndustry = /landscap|hvac|plumb|electr|paint|clean|roof|carpet|pest|window|fence|concrete|handyman|contractor|lawn|tree|snow|pressure|hauling|moving|flooring|tile|remodel|construct|mechanic|auto|pool|spa|septic|well|drain|sewer|stucco|insul|solar|gutter|siding|drywall/.test(userLower);
+CONVERSATION:
+${conversationText}
 
-  // Location: city/state pattern or confirmed by agent
-  const hasLocation = /,\s*[a-zA-Z]{2}/.test(userText) || /pa|nj|ny|ca|tx|fl|oh|il|ga|va|md|nc|sc|mi|wi|mn|mo|co|az|wa|or/.test(userLower) || (assistantText.includes('location') && assistantText.includes('updated'));
+Return ONLY this JSON, no explanation:
+{
+  "businessName": true/false,
+  "phone": true/false,
+  "industry": true/false,
+  "location": true/false,
+  "services": true/false,
+  "areas": true/false,
+  "yearsInBusiness": true/false,
+  "licensed": true/false,
+  "hours": true/false
+}
 
-  // Services: 3+ service words or commas suggesting a list
-  const serviceMatches = userText.match(/install|repair|mainten|service|replac|inspect|clean|maintain|emergen|diagnos|troubleshoot|design|build|construct|landscap|mow|trim|prune|plant|sod|mulch|haul|demo|paint|prime|stain|seal|pressure|wash|gutter|roof|shingle|tile|floor|drywall|fence|deck|patio|porch|remodel|renovat/gi) || [];
-  const commaCount = (userText.match(/,/g) || []).length;
-  const hasServices = serviceMatches.length >= 2 || commaCount >= 2;
+Rules:
+- businessName: true if client stated their business name and agent acknowledged it
+- phone: true if a phone number was provided
+- industry: true if the type of business/service was stated
+- location: true if a city or location was stated
+- services: true if 3 or more services were listed
+- areas: true if service areas were mentioned (even "surrounding areas" counts)
+- yearsInBusiness: true if years in business was stated (any number of years)
+- licensed: true if licensed/insured status was confirmed (yes counts)
+- hours: true if business hours were stated in any form`;
 
-  // Areas: 2+ area mentions
-  const areaMatches = userText.match(/[A-Z][a-z]{2,}(?:\s[A-Z][a-z]+)?(?:\s*,|\s+and\s)/g) || [];
-  const hasAreas = areaMatches.length >= 1 || /surround|county|area|region|nearby|township|borough/.test(userLower) || commaCount >= 2;
-
-  // Years in business
-  const hasYears = /\d+\s*(?:year|yr)s?|since\s*\d{4}|founded\s*\d{4}|started\s*\d{4}|been\s*(?:in business\s*)?\d+|operating\s*(?:for\s*)?\d+/.test(userLower) || (assistantText.includes('year') && assistantText.includes('updated'));
-
-  // Licensed/insured
-  const hasLicensed = /licens|insur|bonded|certif/.test(userLower) || (assistantText.includes('licensed') && assistantText.includes('updated'));
-
-  // Hours
-  const hasHours = /\d{1,2}\s*(?:am|pm|a\.m|p\.m)|open|hour|available\s*7|24\/7|monday|tuesday|daily|weekday|weekend|flexible|by\s*appoint/.test(userLower) || (assistantText.includes('hour') && assistantText.includes('updated'));
-
-  return { businessName: hasBusinessName, phone: hasPhone, industry: hasIndustry, location: hasLocation, services: hasServices, areas: hasAreas, yearsInBusiness: hasYears, licensed: hasLicensed, hours: hasHours };
+  try {
+    const raw = await callClaude('Return only valid JSON, nothing else.', prompt, 200);
+    const cleaned = raw.replace(/^```json
+?/,'').replace(/^```
+?/,'').replace(/
+?```$/,'').trim();
+    return JSON.parse(cleaned);
+  } catch(e) {
+    console.log('checkCollected error:', e.message);
+    return { businessName: false, phone: false, industry: false, location: false, services: false, areas: false, yearsInBusiness: false, licensed: false, hours: false };
+  }
 }
 
 // Analyze what required info has been collected
