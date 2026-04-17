@@ -70,7 +70,7 @@ CRITICAL ANTI-LOOP RULES — FOLLOW STRICTLY:
 6. If you are unsure whether something was already answered — assume it was and move on.
 7. Maximum 8 questions total across the entire conversation. After 8 questions, output DEPLOY_READY regardless.
 
-Never make the client feel like they are talking to a bot. Make every interaction feel like working with a dedicated expert who genuinely cares about their success.\`;
+Never make the client feel like they are talking to a bot. Make every interaction feel like working with a dedicated expert who genuinely cares about their success.`;
 }
 
 module.exports = { websiteAgentSystem };
