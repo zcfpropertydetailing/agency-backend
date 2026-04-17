@@ -2,85 +2,86 @@ const CF_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
 const CF_ACCOUNT = process.env.CLOUDFLARE_ACCOUNT_ID;
 const CF_BASE = 'https://api.cloudflare.com/client/v4';
 
-const headers = {
-  'Authorization': `Bearer ${CF_TOKEN}`,
-  'Content-Type': 'application/json'
-};
-
-// Create a new Cloudflare Pages project
 async function createProject(projectName) {
   const res = await fetch(`${CF_BASE}/accounts/${CF_ACCOUNT}/pages/projects`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Authorization': `Bearer ${CF_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
       name: projectName,
       production_branch: 'main'
     })
   });
   const data = await res.json();
-  if (!data.success) throw new Error('Failed to create Pages project: ' + JSON.stringify(data.errors));
+  if (!data.success) {
+    const msg = JSON.stringify(data.errors);
+    if (msg.includes('already exist') || msg.includes('duplicate') || msg.includes('taken')) {
+      return { id: projectName, name: projectName };
+    }
+    throw new Error('Failed to create Pages project: ' + msg);
+  }
   return data.result;
 }
 
-// Deploy files to a Pages project using Direct Upload
-async function deployFiles(projectName, files) {
-  // files is an object: { 'index.html': htmlContent, ... }
-  
-  // Create a form data payload
+async function deployToPages(projectName, htmlContent) {
   const FormData = require('form-data');
   const form = new FormData();
-  
-  const manifest = {};
-  
-  for (const [filename, content] of Object.entries(files)) {
-    const buf = Buffer.from(content, 'utf8');
-    form.append('files', buf, { filename, contentType: getContentType(filename) });
-    manifest[`/${filename}`] = filename;
-  }
-  
+
+  // Correct manifest format: { "/path": "" }
+  const manifest = { '/index.html': '' };
   form.append('manifest', JSON.stringify(manifest));
-  
-  const res = await fetch(`${CF_BASE}/accounts/${CF_ACCOUNT}/pages/projects/${projectName}/deployments`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${CF_TOKEN}`,
-      ...form.getHeaders()
-    },
-    body: form
+
+  // File must be appended with path as field name (including leading slash)
+  const buf = Buffer.from(htmlContent, 'utf8');
+  form.append('/index.html', buf, {
+    filename: 'index.html',
+    contentType: 'text/html'
   });
-  
-  const data = await res.json();
-  if (!data.success) throw new Error('Failed to deploy: ' + JSON.stringify(data.errors));
+
+  const res = await fetch(
+    `${CF_BASE}/accounts/${CF_ACCOUNT}/pages/projects/${projectName}/deployments`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CF_TOKEN}`,
+        ...form.getHeaders()
+      },
+      body: form
+    }
+  );
+
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error('Cloudflare returned non-JSON: ' + text.substring(0, 200));
+  }
+
+  if (!data.success) {
+    throw new Error('Deploy failed: ' + JSON.stringify(data.errors));
+  }
+
   return data.result;
 }
 
-function getContentType(filename) {
-  if (filename.endsWith('.html')) return 'text/html';
-  if (filename.endsWith('.css')) return 'text/css';
-  if (filename.endsWith('.js')) return 'application/javascript';
-  return 'text/plain';
-}
-
-// Full deployment: create project and deploy files
 async function deployClientSite(clientData, htmlContent) {
   const projectName = generateProjectName(clientData.businessName);
-  
-  // Try to create the project (may already exist)
-  let project;
+
+  // Create project (ignore if already exists)
   try {
-    project = await createProject(projectName);
+    await createProject(projectName);
   } catch (e) {
-    // If project already exists, use existing
-    if (!e.message.includes('already exists')) throw e;
+    console.log('Project note:', e.message);
   }
-  
-  // Deploy the files
-  const deployment = await deployFiles(projectName, {
-    'index.html': htmlContent
-  });
-  
+
+  // Deploy the HTML
+  const deployment = await deployToPages(projectName, htmlContent);
+
   const siteUrl = `https://${projectName}.pages.dev`;
-  
+
   return {
     projectName,
     siteUrl,
@@ -90,19 +91,14 @@ async function deployClientSite(clientData, htmlContent) {
 }
 
 function generateProjectName(businessName) {
-  return businessName
+  const base = businessName
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
-    .substring(0, 28) + '-' + Date.now().toString(36).slice(-4);
+    .substring(0, 24);
+  const suffix = Date.now().toString(36).slice(-4);
+  return `${base}-${suffix}`;
 }
 
-// Get all Pages projects
-async function getProjects() {
-  const res = await fetch(`${CF_BASE}/accounts/${CF_ACCOUNT}/pages/projects`, { headers });
-  const data = await res.json();
-  return data.result || [];
-}
-
-module.exports = { createProject, deployFiles, deployClientSite, getProjects };
+module.exports = { createProject, deployClientSite };
