@@ -101,14 +101,40 @@ router.post('/chat', requireAuth, async (req, res) => {
       }
     }
 
-    // For website agent, check what's been collected
+    // For website agent, check what's been collected (only until all 9 confirmed)
     let collected = null;
     if (agentType === 'website') {
-      const fullHistory = [...(history || []),
-        { role: 'user', content: message },
-        { role: 'assistant', content: reply }
-      ];
-      collected = await checkCollected(fullHistory);
+      // Check if all 9 were already confirmed in a previous message
+      const { data: lastLog } = await supabase
+        .from('agent_logs')
+        .select('notes')
+        .eq('client_id', req.user.id)
+        .eq('agent_type', 'website')
+        .eq('action', 'checklist_complete')
+        .limit(1);
+
+      if (lastLog && lastLog.length > 0) {
+        // Already complete — return the stored result without calling Claude
+        collected = JSON.parse(lastLog[0].notes);
+      } else {
+        const fullHistory = [...(history || []),
+          { role: 'user', content: message },
+          { role: 'assistant', content: reply }
+        ];
+        collected = await checkCollected(fullHistory);
+
+        // If all 9 are now complete, save so we never check again
+        const allDone = Object.values(collected).every(v => v === true);
+        if (allDone) {
+          await supabase.from('agent_logs').insert({
+            client_id: req.user.id,
+            agent_type: 'website',
+            action: 'checklist_complete',
+            outcome: 'success',
+            notes: JSON.stringify(collected)
+          });
+        }
+      }
     }
 
     res.json({ reply, collected });
@@ -159,9 +185,7 @@ async function checkCollected(messages) {
   
   const conversationText = messages
     .map(m => m.role.toUpperCase() + ': ' + m.content)
-    .join('
-
-')
+    .join('\n\n')
     .substring(0, 3000);
 
   const prompt = `Read this website onboarding conversation and determine which of 9 items the client has confirmed. Be generous — if the agent confirmed receiving something with "Updated ✓" or similar, mark it true.
@@ -195,10 +219,7 @@ Rules:
 
   try {
     const raw = await callClaude('Return only valid JSON, nothing else.', prompt, 200);
-    const cleaned = raw.replace(/^```json
-?/,'').replace(/^```
-?/,'').replace(/
-?```$/,'').trim();
+    const cleaned = raw.replace(/^```json\n?/,'').replace(/^```\n?/,'').replace(/\n?```$/,'').trim();
     return JSON.parse(cleaned);
   } catch(e) {
     console.log('checkCollected error:', e.message);
