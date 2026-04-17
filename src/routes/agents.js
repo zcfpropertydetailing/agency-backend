@@ -66,13 +66,7 @@ router.post('/chat', requireAuth, async (req, res) => {
       content: message
     });
 
-    // Save assistant reply
-    await supabase.from('conversations').insert({
-      client_id: req.user.id,
-      agent_type: agentType,
-      role: 'assistant',
-      content: reply
-    });
+    // (reply saved above with STATUS stripped)
 
     // Log agent action
     await supabase.from('agent_logs').insert({
@@ -101,44 +95,32 @@ router.post('/chat', requireAuth, async (req, res) => {
       }
     }
 
-    // For website agent, check what's been collected (only until all 9 confirmed)
+    // Parse STATUS tag from reply for website agent
     let collected = null;
-    const userMessageCount = (history || []).filter(m => m.role === 'user').length + 1;
-    if (agentType === 'website' && userMessageCount >= 1) {
-      // Check if all 9 were already confirmed in a previous message
-      const { data: lastLog } = await supabase
-        .from('agent_logs')
-        .select('notes')
-        .eq('client_id', req.user.id)
-        .eq('agent_type', 'website')
-        .eq('action', 'checklist_complete')
-        .limit(1);
-
-      if (lastLog && lastLog.length > 0) {
-        // Already complete — return the stored result without calling Claude
-        collected = JSON.parse(lastLog[0].notes);
-      } else {
-        const fullHistory = [...(history || []),
-          { role: 'user', content: message },
-          { role: 'assistant', content: reply }
-        ];
-        collected = await checkCollected(fullHistory);
-
-        // If all 9 are now complete, save so we never check again
-        const allDone = Object.values(collected).every(v => v === true);
-        if (allDone) {
-          await supabase.from('agent_logs').insert({
-            client_id: req.user.id,
-            agent_type: 'website',
-            action: 'checklist_complete',
-            outcome: 'success',
-            notes: JSON.stringify(collected)
-          });
+    let cleanReply = reply;
+    
+    if (agentType === 'website') {
+      const statusMatch = reply.match(/\[STATUS:(\{[^}]+\})\]/);
+      if (statusMatch) {
+        try {
+          collected = JSON.parse(statusMatch[1]);
+          // Strip the STATUS tag from the stored and displayed reply
+          cleanReply = reply.replace(/\[STATUS:\{[^}]+\}\]/, '').trim();
+        } catch(e) {
+          console.log('STATUS parse error:', e.message);
         }
       }
     }
 
-    res.json({ reply, collected });
+    // Save assistant reply (without STATUS tag)
+    await supabase.from('conversations').insert({
+      client_id: req.user.id,
+      agent_type: agentType,
+      role: 'assistant',
+      content: cleanReply
+    });
+
+    res.json({ reply: cleanReply, collected });
   } catch (err) {
     console.error('Agent chat error:', err);
     res.status(500).json({ error: 'Agent encountered an error. Please try again.' });
