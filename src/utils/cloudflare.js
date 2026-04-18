@@ -25,6 +25,24 @@ async function createProject(projectName) {
   } catch(e) { console.log('createProject error:', e.message); throw e; }
 }
 
+async function verifyProjectExists(projectName, maxAttempts = 10) {
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const res = await fetch(`${CF_BASE}/accounts/${CF_ACCOUNT}/pages/projects/${projectName}`, {
+        headers: { 'Authorization': `Bearer ${CF_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        console.log(`Project verified after ${i + 1} attempts`);
+        return true;
+      }
+    } catch(e) {}
+    console.log(`Waiting for project to be ready (attempt ${i + 1}/${maxAttempts})...`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  throw new Error('Project not ready after maximum attempts');
+}
+
 async function deployWithWrangler(projectName, htmlContent) {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'site-'));
   fs.writeFileSync(path.join(tmpDir, 'index.html'), htmlContent, 'utf8');
@@ -47,9 +65,16 @@ async function deployWithWrangler(projectName, htmlContent) {
 async function deployClientSite(clientData, htmlContent) {
   const projectName = generateProjectName(clientData.businessName);
   console.log('Starting deployment for:', projectName);
+
+  // Create project
   await createProject(projectName);
-  await new Promise(resolve => setTimeout(resolve, 3000));
+
+  // Wait until project is confirmed ready in Cloudflare API
+  await verifyProjectExists(projectName);
+
+  // Deploy with wrangler
   await deployWithWrangler(projectName, htmlContent);
+
   const siteUrl = `https://${projectName}.pages.dev`;
   console.log('Deployed to:', siteUrl);
   return { projectName, siteUrl, previewUrl: siteUrl };
