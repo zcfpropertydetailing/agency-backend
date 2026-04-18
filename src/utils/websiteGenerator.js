@@ -99,7 +99,8 @@ If client provided real testimonials in conversation, include them. If they prov
   }
 
   return fillTemplate(TEMPLATES[templateKey], content, {
-    businessName, industry, location, phone, phoneRaw, hours, serviceList, areaList
+    businessName, industry, location, phone, phoneRaw, hours, serviceList, areaList,
+    uploadedImages: clientData.uploadedImages || []
   }, templateKey);
 }
 
@@ -160,6 +161,47 @@ function fillTemplate(template, content, meta, templateKey) {
   const serviceOptions = ['<option value="">Select a service...</option>'].concat(serviceList.map(s => `<option>${s}</option>`)).join('\n');
   const footerServices = serviceList.slice(0,5).map(s => `<li><a href="#services">${s}</a></li>`).join('\n');
 
+  // Generate image gallery HTML if images are uploaded
+  const uploadedImages = meta.uploadedImages || [];
+  let galleryHTML = '';
+  if (uploadedImages.length > 0) {
+    if (templateKey === 'luxury') {
+      galleryHTML = `<section class="gallery fade-in" style="padding:140px 0;background:var(--cream)">
+        <div class="container">
+          <div style="text-align:center;margin-bottom:80px">
+            <div class="section-eyebrow" style="justify-content:center">Our Work</div>
+            <h2 class="section-head" style="margin:0 auto">Recent <em>projects</em>.</h2>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+            ${uploadedImages.map(url => `<div style="aspect-ratio:4/3;overflow:hidden;border-radius:8px"><img src="${url}" alt="Work sample" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:.5s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"></div>`).join('')}
+          </div>
+        </div>
+      </section>`;
+    } else if (templateKey === 'minimal') {
+      galleryHTML = `<section class="gallery fade-in" style="padding:160px 0;background:var(--bg)">
+        <div class="container">
+          <div class="section-label">/ Our Work</div>
+          <h2 class="section-title">Recent <span>projects.</span></h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:64px">
+            ${uploadedImages.map(url => `<div style="aspect-ratio:1;overflow:hidden;border-radius:24px"><img src="${url}" alt="Work sample" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}
+          </div>
+        </div>
+      </section>`;
+    } else {
+      galleryHTML = `<section class="gallery fade-in" style="padding:100px 0;background:#0f0f0e">
+        <div class="container">
+          <div style="text-align:center;margin-bottom:60px">
+            <div class="section-label" style="color:var(--accent);font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:13px">/ OUR WORK</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:72px;color:white;margin-top:16px">RECENT PROJECTS</h2>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+            ${uploadedImages.map(url => `<div style="aspect-ratio:4/3;overflow:hidden;border-radius:8px;border:1px solid rgba(255,255,255,0.08)"><img src="${url}" alt="Work sample" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}
+          </div>
+        </div>
+      </section>`;
+    }
+  }
+
   const logoName = content.logoName || businessName.split(' ').slice(0,2).join(' ');
   const logoInitial = content.logoInitial || logoName.charAt(0).toUpperCase();
 
@@ -174,7 +216,7 @@ function fillTemplate(template, content, meta, templateKey) {
   const stat4 = content.stat4Num || 'Free';
   const stat4Label = content.stat4Label || 'Estimates';
 
-  return template
+  let filled = template
     .replace(/{{BUSINESS_NAME}}/g, businessName)
     .replace(/{{INDUSTRY}}/g, industry)
     .replace(/{{LOCATION}}/g, location)
@@ -230,6 +272,18 @@ function fillTemplate(template, content, meta, templateKey) {
     .replace(/{{SERVICE_OPTIONS}}/g, serviceOptions)
     .replace(/{{FOOTER_DESC}}/g, content.footerDesc || '')
     .replace(/{{FOOTER_SERVICES}}/g, footerServices);
+
+  // Inject gallery after services section if images exist
+  if (galleryHTML) {
+    filled = filled.replace('<!-- PHILOSOPHY -->', galleryHTML + '\n<!-- PHILOSOPHY -->');
+    filled = filled.replace('<!-- FEATURE -->', galleryHTML + '\n<!-- FEATURE -->');
+    if (!filled.includes(galleryHTML)) {
+      // Fallback: inject before footer
+      filled = filled.replace('<footer>', galleryHTML + '\n<footer>');
+    }
+  }
+
+  return filled;
 }
 
 function getDefaults(businessName, industry, location, services) {

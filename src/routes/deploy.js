@@ -37,10 +37,11 @@ Extract and return this JSON with ONLY information explicitly stated in the conv
   "colors": {"primary": "", "accent": ""},
   "founderName": "",
   "certifications": "",
-  "template": ""
+  "template": "",
+  "uploadedImages": ["list of any Supabase storage URLs mentioned in the conversation"]
 }
 
-IMPORTANT: Use ONLY what the client actually said. Do not infer or make up anything.`;
+IMPORTANT: Use ONLY what the client actually said. Do not infer or make up anything. For uploadedImages, include ALL https:// URLs from supabase.co or storage.googleapis.com mentioned by the client.`;
 
   try {
     const raw = await callClaude('Extract data from conversation. Return only valid JSON.', prompt, 2000);
@@ -107,6 +108,7 @@ router.post('/website', requireAuth, async (req, res) => {
       colors: extractedData.colors || {},
       founderName: extractedData.founderName || '',
       certifications: extractedData.certifications || '',
+      uploadedImages: extractedData.uploadedImages || [],
       template: extractedData.template || deployData.template || '',
       conversationContext: conversationText
     };
