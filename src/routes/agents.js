@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const { requireAuth } = require('../middleware/auth');
 const supabase = require('../utils/supabase');
 const { callClaudeWithHistory } = require('../utils/anthropic');
@@ -214,6 +216,38 @@ Rules — mark true ONLY if:
     return { businessName: false, phone: false, industry: false, location: false, services: false, areas: false, yearsInBusiness: false, licensed: false, hours: false };
   }
 }
+
+// File upload endpoint
+router.post('/upload', requireAuth, upload.array('files', 10), async (req, res) => {
+  try {
+    const urls = [];
+    const files = req.files || [];
+    console.log(`Uploading ${files.length} files`);
+    
+    for (const file of files) {
+      // Upload to Supabase storage
+      const fileName = `${req.user.id}/${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+      const { data, error } = await supabase.storage
+        .from('client-assets')
+        .upload(fileName, file.buffer, {
+          contentType: file.mimetype,
+          upsert: true
+        });
+
+      if (!error) {
+        const { data: urlData } = supabase.storage
+          .from('client-assets')
+          .getPublicUrl(fileName);
+        urls.push(urlData.publicUrl);
+      }
+    }
+
+    res.json({ success: true, urls });
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    res.json({ success: false, urls: [] });
+  }
+});
 
 // Analyze what required info has been collected
 router.get('/collected/website', requireAuth, async (req, res) => {
